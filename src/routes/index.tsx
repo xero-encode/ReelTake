@@ -123,21 +123,37 @@ function FeaturedTitlesSection({ titles }: { titles: FeaturedTitle[] }) {
   );
 }
 
+function resolvePosterUrl(url: string): string {
+  // GitHub blob pages return HTML, not image bytes — rewrite to raw.
+  const blobMatch = url.match(
+    /^https?:\/\/github\.com\/([^/]+)\/([^/]+)\/blob\/(.+)$/,
+  );
+  if (blobMatch) {
+    const [, user, repo, rest] = blobMatch;
+    return `https://raw.githubusercontent.com/${user}/${repo}/${rest}`;
+  }
+  return url;
+}
+
 function TitleCard({ title }: { title: FeaturedTitle }) {
   return (
     <article className="flex flex-col">
       <div className="aspect-[2/3] w-full overflow-hidden border border-border bg-muted">
         {title.poster_url ? (
           <img
-            src={title.poster_url}
+            src={resolvePosterUrl(title.poster_url)}
             alt={`${title.name} poster`}
             loading="lazy"
             className="h-full w-full object-cover"
+            onError={(e) => {
+              e.currentTarget.style.display = "none";
+            }}
           />
         ) : (
           <PosterPlaceholder name={title.name} />
         )}
       </div>
+
       <h3 className="mt-5 font-serif text-2xl leading-tight tracking-tight text-foreground">
         {title.name}
       </h3>
