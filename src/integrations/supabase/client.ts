@@ -7,12 +7,17 @@ const viteEnv = (import.meta as unknown as { env?: Record<string, string | undef
 const nodeEnv: Record<string, string | undefined> =
   typeof process !== "undefined" && process.env ? process.env : {};
 
+// Publishable values — safe to commit. Override via VITE_SUPABASE_* if needed.
+const DEFAULT_SUPABASE_URL = "https://qurqfrwclnqdeasrugip.supabase.co";
+const DEFAULT_SUPABASE_PUBLISHABLE_KEY =
+  "sb_publishable_FP16X2w6ft_kjQSX7n5mHA_7sp6z8OA";
+
 const supabaseUrl =
   viteEnv.VITE_SUPABASE_URL ??
   viteEnv.VITE_APP_SUPABASE_URL ??
   nodeEnv.SUPABASE_URL ??
   nodeEnv.PROJECT_SUPABASE_URL ??
-  "";
+  DEFAULT_SUPABASE_URL;
 
 const supabasePublishableKey =
   viteEnv.VITE_SUPABASE_PUBLISHABLE_KEY ??
@@ -20,7 +25,8 @@ const supabasePublishableKey =
   viteEnv.VITE_APP_SUPABASE_PUBLISHABLE_KEY ??
   nodeEnv.SUPABASE_PUBLISHABLE_KEY ??
   nodeEnv.SUPABASE_ANON_KEY ??
-  "";
+  DEFAULT_SUPABASE_PUBLISHABLE_KEY;
+
 
 function createStub(): SupabaseClient {
   const message =
