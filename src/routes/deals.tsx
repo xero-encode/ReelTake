@@ -47,21 +47,17 @@ function DealsPage() {
     <div className="min-h-screen bg-background">
       <AppHeader />
       <main className="mx-auto max-w-6xl px-6 py-10">
-        <div className="mb-8 flex items-end justify-between">
-          <div>
-            <h1 className="font-serif text-4xl text-foreground">Deals</h1>
-            <p className="mt-1 text-sm text-muted-foreground">
-              The split you've agreed with each venue for each film.
-            </p>
-          </div>
-          <AddDealDialog />
+        <div className="mb-8">
+          <h1 className="font-serif text-4xl text-foreground">Deals</h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            The split you've agreed with each venue for each film.
+          </p>
         </div>
 
         {deals.length === 0 ? (
           <EmptyState
             title="No deals yet"
-            description="Add a deal so ReelTake can calculate what you're owed."
-            action={<AddDealDialog />}
+            description="Deals are added automatically when statements are processed."
           />
         ) : (
           <div className="space-y-8">
