@@ -45,10 +45,10 @@ export interface Deal {
 
 export interface Statement {
   id: string;
-  title_id: string | null;
   exhibitor_id: string | null;
   file_url: string | null;
   raw_extracted_json: unknown;
+  fx_rate_applied: number | null;
   period_start: string | null;
   period_end: string | null;
   status: StatementStatus | string;

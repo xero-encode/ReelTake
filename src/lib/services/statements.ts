@@ -14,38 +14,46 @@ export interface StatementListItem extends Statement {
   totalGross: number;
 }
 
+interface LineTitleRow {
+  gross_amount: number | null;
+  deal: { title: Pick<Title, "id" | "name" | "poster_url"> | null } | null;
+}
+
 export async function listStatementsWithTotals(): Promise<StatementListItem[]> {
   const { data, error } = await supabase
     .from("statements")
     .select(
-      `id, title_id, exhibitor_id, file_url, raw_extracted_json,
+      `id, exhibitor_id, file_url, raw_extracted_json, fx_rate_applied,
        period_start, period_end, status, created_at,
-       title:titles(id, name, poster_url),
        exhibitor:exhibitors(id, name),
-       box_office_lines(gross_amount)`,
+       box_office_lines(gross_amount, deal:deals(title:titles(id, name, poster_url)))`,
     )
     .order("created_at", { ascending: false });
 
   if (error) throw error;
+
   type Row = Omit<StatementListItem, "totalGross" | "title" | "exhibitor"> & {
-    title: StatementListItem["title"];
     exhibitor: StatementListItem["exhibitor"];
-    box_office_lines: { gross_amount: number | null }[] | null;
+    box_office_lines: LineTitleRow[] | null;
   };
+
   return (data as unknown as Row[]).map((row) => {
-    const totalGross = (row.box_office_lines ?? []).reduce(
-      (acc, l) => acc + (l.gross_amount ?? 0),
-      0,
-    );
+    const lines = row.box_office_lines ?? [];
+    const totalGross = lines.reduce((acc, l) => acc + (l.gross_amount ?? 0), 0);
+    // Derive title from the first line's deal (a statement is one film).
+    const title =
+      lines.find((l) => l.deal?.title)?.deal?.title ?? null;
     const { box_office_lines: _drop, ...rest } = row;
     void _drop;
-    return { ...rest, totalGross };
+    return { ...rest, title, totalGross };
   });
 }
 
 export interface LineWithDeal extends BoxOfficeLine {
   venue: Pick<Venue, "id" | "name"> | null;
-  deal: Pick<Deal, "id" | "split_percentage"> | null;
+  deal:
+    | (Pick<Deal, "id" | "split_percentage"> & { title: Pick<Title, "id" | "name"> | null })
+    | null;
 }
 
 export interface StatementDetail extends Statement {
@@ -58,15 +66,14 @@ export async function getStatement(id: string): Promise<StatementDetail | null> 
   const { data, error } = await supabase
     .from("statements")
     .select(
-      `id, title_id, exhibitor_id, file_url, raw_extracted_json,
+      `id, exhibitor_id, file_url, raw_extracted_json, fx_rate_applied,
        period_start, period_end, status, created_at,
-       title:titles(*),
        exhibitor:exhibitors(*),
        box_office_lines(
          id, statement_id, venue_id, play_date, screen, format,
          ticket_type, admissions, gross_amount, deal_id, created_at,
          venue:venues(id, name),
-         deal:deals(id, split_percentage)
+         deal:deals(id, split_percentage, title:titles(id, name))
        )`,
     )
     .eq("id", id)
@@ -74,14 +81,29 @@ export async function getStatement(id: string): Promise<StatementDetail | null> 
 
   if (error) throw error;
   if (!data) return null;
-  const detail = data as unknown as StatementDetail;
-  // Sort lines by play_date for a stable view.
-  detail.box_office_lines = [...detail.box_office_lines].sort((a, b) => {
+
+  const raw = data as unknown as Omit<StatementDetail, "title" | "box_office_lines"> & {
+    box_office_lines: LineWithDeal[];
+  };
+
+  // Sort lines by play_date for a stable view
+  const sortedLines = [...raw.box_office_lines].sort((a, b) => {
     if (!a.play_date) return 1;
     if (!b.play_date) return -1;
     return a.play_date.localeCompare(b.play_date);
   });
-  return detail;
+
+  // Derive the title from the first line's deal
+  const firstTitle = sortedLines.find((l) => l.deal?.title)?.deal?.title ?? null;
+  const title: Title | null = firstTitle
+    ? { id: firstTitle.id, name: firstTitle.name, poster_url: null, created_at: "" }
+    : null;
+
+  return {
+    ...raw,
+    title,
+    box_office_lines: sortedLines,
+  };
 }
 
 export async function markStatementReviewed(id: string): Promise<void> {
