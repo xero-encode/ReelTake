@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-import type { Database } from "./types";
+
 
 const supabaseUrl =
   import.meta.env.VITE_SUPABASE_URL ?? import.meta.env.SUPABASE_URL;
@@ -14,7 +14,7 @@ if (!supabaseUrl || !supabasePublishableKey) {
   );
 }
 
-export const supabase = createClient<Database>(supabaseUrl, supabasePublishableKey, {
+export const supabase = createClient(supabaseUrl, supabasePublishableKey, {
   auth: {
     persistSession: true,
     autoRefreshToken: true,

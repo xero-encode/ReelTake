@@ -7,7 +7,7 @@
 // code ships to the client bundle (only handler bodies are stripped).
 
 import { createClient } from "@supabase/supabase-js";
-import type { Database } from "./types";
+
 
 const supabaseUrl = process.env.SUPABASE_URL;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -18,7 +18,7 @@ if (!supabaseUrl || !serviceRoleKey) {
   );
 }
 
-export const supabaseAdmin = createClient<Database>(supabaseUrl, serviceRoleKey, {
+export const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey, {
   auth: {
     persistSession: false,
     autoRefreshToken: false,

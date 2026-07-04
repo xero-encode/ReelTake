@@ -1,7 +1,7 @@
 import { createMiddleware } from "@tanstack/react-start";
 import { getRequestHeader } from "@tanstack/react-start/server";
 import { createClient } from "@supabase/supabase-js";
-import type { Database } from "./types";
+
 
 // Server function middleware that validates the caller's Supabase session
 // (bearer token from `attachSupabaseAuth`) and exposes a Supabase client
@@ -28,7 +28,7 @@ export const requireSupabaseAuth = createMiddleware({ type: "function" }).server
       );
     }
 
-    const supabase = createClient<Database>(supabaseUrl, supabasePublishableKey, {
+    const supabase = createClient(supabaseUrl, supabasePublishableKey, {
       auth: {
         persistSession: false,
         autoRefreshToken: false,
