@@ -55,7 +55,7 @@ function ReviewInner({ statement }: { statement: StatementDetail }) {
   const totals = statementTotals(statement.box_office_lines);
   const canConfirm =
     totals.linesMissingDeal === 0 &&
-    (statement.status === "received" || statement.status === "parsed");
+    (statement.status === "uploaded" || statement.status === "parsed");
 
   const confirm = useMutation({
     mutationFn: () => markStatementReviewed(statement.id),
@@ -198,8 +198,7 @@ function ReviewInner({ statement }: { statement: StatementDetail }) {
       {/* Actions */}
       <div className="mt-8 flex flex-wrap items-center gap-3">
         {statement.status !== "reviewed" &&
-          statement.status !== "invoiced" &&
-          statement.status !== "paid" && (
+          statement.status !== "invoiced" && (
             <>
               <Button
                 onClick={() => confirm.mutate()}
@@ -225,7 +224,7 @@ function ReviewInner({ statement }: { statement: StatementDetail }) {
           </Button>
         )}
 
-        {(statement.status === "invoiced" || statement.status === "paid") && (
+        {statement.status === "invoiced" && (
           <p className="text-sm text-muted-foreground">
             Invoice already raised for this statement.
           </p>
