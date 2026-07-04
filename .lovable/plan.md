@@ -1,74 +1,180 @@
-## Goal
+# ReelTake v1 — Statements, Review, Deals
 
-Install the Supabase client and create the minimal integration layer so components, server functions, and (later) edge functions can talk to your existing Supabase project. No schema changes, no UI, no auth pages — just wiring.
+Build the three screens end-to-end against the existing Supabase schema, seed
+demo data, and wire the design system. No new tables or columns.
 
-## Preflight: confirm the connection actually injected env vars
+## Design system (applied from the start)
 
-The connectors listing currently shows no Supabase connection linked to this project, and `fetch_secrets` shows only `LOVABLE_API_KEY`. Before writing any code I'll check whether `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` (plus the `VITE_SUPABASE_*` variants) are present.
+Overwrite `src/styles.css` tokens to match the knowledge file:
 
-If they aren't, I'll ask you to add them via `add_secret` (paste the values from your Supabase project → Settings → API). The publishable/anon key and URL are safe to expose as `VITE_*`; the service role key stays server-only.
+- **Base**: ink black `oklch(0.14 0 0)` on warm off-white `oklch(0.98 0.01 85)`.
+- **Accent (ticket-stub red)**: `oklch(0.58 0.22 27)` — used only for the
+  primary CTA, active nav underline, and the "Needs review" chip.
+- **Type**: editorial serif for headings (Fraunces via `<link>` in
+  `__root.tsx`), clean sans (Inter) for body, `font-feature-settings: "tnum"`
+  on every money column.
+- **Chips**: quiet, low-contrast pills — Received (slate), Needs review
+  (red), Parsed (slate), Reviewed (ink outline), Invoiced (ink solid),
+  Paid (green), Failed (destructive).
+- Update `__root.tsx` head to real ReelTake title/description and font `<link>`s.
 
-Required names:
-- `SUPABASE_URL` and `VITE_SUPABASE_URL`
-- `SUPABASE_PUBLISHABLE_KEY` and `VITE_SUPABASE_PUBLISHABLE_KEY` (anon key)
-- `SUPABASE_SERVICE_ROLE_KEY` (server only, never `VITE_`)
+## Shared plumbing
 
-## Install
+- `src/lib/format.ts` — `formatCurrency(amount)` → `£1,234.56`, `formatDate(iso)`
+  → `DD/MM/YYYY`, `formatPeriod(start, end)`.
+- `src/lib/split.ts` — **the one pure split utility**:
+  `distributorShare(gross: number, splitPercentage: number): number` that
+  multiplies then rounds half-up to the nearest penny **once at the end**.
+  Also `statementTotals(lines)` returning `{ totalGross, totalOwed,
+  linesMissingDeal }`, built on top of it. Unit-tested with vitest
+  (`src/lib/split.test.ts`) covering: basic split, rounding boundary
+  (£12.345 → £12.35), null gross, missing deal (line contributes to gross
+  but not to owed).
+- `src/lib/db/types.ts` — hand-written TS types for the seven tables from the
+  knowledge file (no generated `types.ts` since we're BYO Supabase).
+- `src/lib/services/statements.ts`, `deals.ts`, `titles.ts`, `venues.ts`,
+  `exhibitors.ts`, `boxOfficeLines.ts` — every Supabase call lives here;
+  components use React Query with these services (no direct `supabase.from`
+  in components, per the knowledge file).
 
-- `bun add @supabase/supabase-js`
+## Routes
 
-## Files to create
+Flat file-based routing under `src/routes/`:
 
-All under `src/integrations/supabase/` following the project convention referenced in the workspace knowledge and TanStack Supabase integration docs.
+```text
+__root.tsx       ← shared shell + header nav (Statements / Deals)
+index.tsx        ← redirect to /statements  (keeps home clean)
+statements.tsx           ← layout with <Outlet />
+statements.index.tsx     ← screen 1 (list)
+statements.$id.tsx       ← screen 2 (review)
+deals.tsx                ← screen 3 (list + add form)
+```
 
-1. `src/integrations/supabase/client.ts` — browser client
-   - `createClient<Database>(VITE_SUPABASE_URL, VITE_SUPABASE_PUBLISHABLE_KEY)` with `persistSession: true`, `autoRefreshToken: true`, `storage: localStorage`.
-   - Used only in components, hooks, event handlers, realtime subscriptions.
+### 1. Statements list (`/statements`)
 
-2. `src/integrations/supabase/client.server.ts` — service-role admin client
-   - `createClient<Database>(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)` with session persistence off.
-   - `.server.ts` extension guarantees the bundler blocks it from client bundles.
-   - Used only inside server function handlers via `await import(...)`.
+- Loader primes React Query with `listStatementsWithTotals()` — one query
+  that joins statements → titles → exhibitors and sums
+  `box_office_lines.gross_amount` per statement (single RPC-less query
+  using nested selects).
+- Filter tabs (URL search param `?status=...`) — All / Needs review
+  (`status in received|parsed|reviewed`) / Invoiced / Paid / Failed.
+- Rows sorted `created_at desc`, grouped visually by status with a soft
+  section header inside the current tab.
+- Row: film title (serif), exhibitor, `formatPeriod`, total gross (tabular),
+  status chip. Whole row is a link to `/statements/$id`.
+- Empty state: "No statements yet — they'll appear here as cinemas email
+  them in."
 
-3. `src/integrations/supabase/types.ts` — placeholder typed `Database` interface
-   - Empty `public: { Tables: {} … }` shell so both clients are generic-typed today.
-   - You'll regenerate it from the live schema with the Supabase CLI in a follow-up (`supabase gen types typescript`) — not part of this setup.
+### 2. Statement review (`/statements/$id`)
 
-4. `src/integrations/supabase/auth-middleware.ts` — `requireSupabaseAuth`
-   - Server function middleware that reads the `Authorization` bearer header, validates the JWT with a publishable-key client via `getUser()`, and puts `{ supabase, userId, claims }` on `context`. Throws 401 when missing/invalid.
+- Loader fetches the statement + title + exhibitor + all
+  `box_office_lines` + their matched `deals`.
+- Header block: title (serif, large), exhibitor, period, status chip.
+- Lines table: play date, venue name, screen, ticket type, admissions
+  (tabular), gross (tabular), split %, distributor share (from
+  `distributorShare()`). Lines with `deal_id === null` render a red
+  "Needs deal" chip in the split column and a `—` in share.
+- Summary strip: total gross, total owed to distributor, count of
+  lines missing a deal.
+- **Confirm figures** button — disabled while any line lacks a deal, or
+  when status isn't in `{received, parsed}`. On click: update
+  `statements.status = 'reviewed'`, invalidate query.
+- **Create invoice in Xero** button — visible only when status is
+  `reviewed`. Uses `useMutation` calling
+  `supabase.functions.invoke('create-invoice', { body: { statementId } })`.
+  Disabled while pending; toast on success/failure. On failure the edge
+  function is expected to leave status as `reviewed` (retryable).
 
-5. `src/integrations/supabase/auth-attacher.ts` — `attachSupabaseAuth`
-   - Client-side function middleware that calls `supabase.auth.getSession()` and attaches `Authorization: Bearer <token>` to every server function call.
+### 3. Deals (`/deals`)
 
-## Files to edit
+- Loader fetches deals + titles + venues.
+- Grouped by title (serif heading + poster placeholder), each group lists
+  deals with venue, split %, valid from → to (open-ended shown as "ongoing").
+- "Add deal" opens a shadcn `Dialog` with a `react-hook-form` + zod form:
+  title (Select), venue (Select — filtered to that title's exhibitor's
+  venues, or all), split % (number, 0–100), valid from (DatePicker),
+  valid to (DatePicker, optional). Submits via
+  `dealsService.create(...)`, invalidates the query.
 
-6. `src/start.ts`
-   - Append `attachSupabaseAuth` to `functionMiddleware` (keep the existing `errorMiddleware` in `requestMiddleware`).
+## Edge function stub
 
-## Service layer scaffolding
+Create `supabase/functions/create-invoice/index.ts` — a Deno edge function
+that:
 
-Per the workspace knowledge ("Route all API calls through a service layer"), I'll create the empty folder skeleton — no functions yet, just the location convention so later features drop in cleanly:
+1. Reads `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` from Deno env.
+2. Verifies caller is authenticated (accepts any signed-in user for now).
+3. Loads the statement; rejects unless `status = 'reviewed'`.
+4. Rejects if an invoice row already exists for that statement (product
+   rule: one invoice per statement, enforced here, not in the DB).
+5. Recomputes the totals server-side from `box_office_lines` + `deals`
+   using the same math as `distributorShare` (duplicated in Deno; kept
+   trivially small).
+6. Inserts an `invoices` row with a fake `xero_invoice_id` like
+   `DEMO-INV-<timestamp>` and `xero_status = 'DRAFT'`, sets
+   `statements.status = 'invoiced'`, returns
+   `{ ok: true, xeroInvoiceId, xeroStatus }`.
+7. On any error, returns `{ ok: false, error }` and does not mutate.
 
-7. `src/lib/services/` — directory with a short `README.md` documenting the convention:
-   - `*.functions.ts` files hold `createServerFn` wrappers (client-safe imports only; `client.server` imported inside handlers).
-   - `*.server.ts` files hold server-only helpers.
-   - Components call these services via `useServerFn` / TanStack Query — never `supabase.from(...)` directly.
+Note: this file is not auto-deployed by Lovable (BYO Supabase). It ships
+as source so you can `supabase functions deploy create-invoice` from the
+CLI. Until then the review-page invoice button will return an error — the
+UI handles that gracefully. Flagging so there are no surprises.
 
-## Not doing (explicit)
+## Demo data seed
 
-- No SQL, no migrations, no table/column/policy changes — your schema is authoritative.
-- No `_authenticated/` route layout, no `/auth` page, no sign-in UI.
-- No edge functions yet — when we add the Make.com invoice call, it will be a Supabase edge function (per your integration rules), created then.
-- No routes, no components, no queries.
+One-off SQL migration file at `supabase/migrations/<ts>_seed_demo.sql`
+that inserts rows into existing tables only. Reuses 3 of the 6 exhibitors
+already in the DB (Curzon, Everyman, Odeon). Adds:
 
-## Verification
+- **Titles (3)**: *Aftersun in Margate*, *The Salt Path Diaries*, *A
+  Quiet Kind of Loud*.
+- **Venues (4)**: Rio Cinema (Everyman-linked for demo), Curzon
+  Bloomsbury, Everyman Crystal Palace, Odeon Covent Garden.
+- **Deals (5)**: e.g. *Aftersun in Margate* at Curzon Bloomsbury 50%
+  weeks 1–2 then 40% ongoing; *Salt Path* at Rio flat 45%; etc. — split
+  changes modelled as two consecutive deals with adjacent date ranges.
+- **Statements (5)** across statuses: 1 `received` (no lines yet), 1
+  `parsed` with lines including one line whose `play_date`/`venue`
+  matches no deal (to exercise the "Needs deal" flag), 1 `reviewed`, 1
+  `invoiced` (with matching `invoices` row + fake xero id), 1 `paid`.
+- **Box office lines** for each statement with realistic ticket types
+  (Standard, Concession, Member), gross amounts in the £80–£1,400 range,
+  matched to the appropriate `deal_id`.
 
-- `bun run build` (or the automatic typecheck) passes.
-- `client.server.ts` is not reachable from any route — verified by build output.
-- `import { supabase } from "@/integrations/supabase/client"` works from a scratch component (I'll remove the scratch import before finishing).
+The seed is idempotent-ish via `ON CONFLICT DO NOTHING` on stable UUIDs
+so re-running won't duplicate.
 
-## Technical notes
+## Testing
 
-- The two-client split (publishable in browser, service role only in `.server.ts`) is what enforces "service role never in browser code" — the bundler fails the build if a client-reachable module imports `client.server`.
-- `attachSupabaseAuth` is required now so that the first `requireSupabaseAuth`-guarded server function you add later just works, without touching `start.ts` again.
-- The empty `Database` type keeps everything compiling today; regenerating types from your live schema is a one-command follow-up and doesn't change any of these files' shapes.
+- `bunx vitest run src/lib/split.test.ts` — the split utility.
+- After build: manually verify each screen in the preview, and confirm
+  the review page correctly disables "Confirm figures" when a line lacks
+  a deal.
+
+## Files created / changed
+
+Created:
+- `src/lib/format.ts`, `src/lib/split.ts`, `src/lib/split.test.ts`
+- `src/lib/db/types.ts`
+- `src/lib/services/{statements,deals,titles,venues,exhibitors,boxOfficeLines}.ts`
+- `src/components/AppHeader.tsx`, `src/components/StatusChip.tsx`,
+  `src/components/EmptyState.tsx`, `src/components/MoneyCell.tsx`
+- `src/routes/index.tsx` (replaced with redirect),
+  `src/routes/statements.tsx`, `src/routes/statements.index.tsx`,
+  `src/routes/statements.$id.tsx`, `src/routes/deals.tsx`
+- `supabase/functions/create-invoice/index.ts`
+- `supabase/migrations/<ts>_seed_demo.sql`
+- shadcn components as needed (`button`, `table`, `tabs`, `dialog`,
+  `select`, `input`, `form`, `calendar`, `popover`, `toast`)
+
+Edited:
+- `src/styles.css` (tokens, fonts)
+- `src/routes/__root.tsx` (real head metadata, font link, header)
+
+## Out of scope for this pass
+
+- Auth screens (the tables have no RLS per your last change, so all reads
+  go through the anon key for now).
+- Real Make webhook wiring — the edge function returns fake Xero data.
+- Realtime updates on the statements list.
+- Investor waterfall, flat-fee deals, statement upload UI, multi-currency.
