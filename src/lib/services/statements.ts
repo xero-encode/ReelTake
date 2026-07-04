@@ -53,9 +53,11 @@ export async function listStatementsWithTotals(): Promise<StatementListItem[]> {
 }
 
 export interface LineWithDeal extends BoxOfficeLine {
-  venue: Pick<Venue, "id" | "name"> | null;
   deal:
-    | (Pick<Deal, "id" | "split_percentage"> & { title: Pick<Title, "id" | "name"> | null })
+    | (Pick<Deal, "id" | "split_percentage"> & {
+        title: Pick<Title, "id" | "name"> | null;
+        venue: Pick<Venue, "id" | "name"> | null;
+      })
     | null;
 }
 
@@ -73,10 +75,11 @@ export async function getStatement(id: string): Promise<StatementDetail | null> 
        period_start, period_end, status, created_at,
        exhibitor:exhibitors(*),
        box_office_lines(
-         id, statement_id, venue_id, play_date, screen, format,
+         id, statement_id, play_date, screen, format,
          ticket_type, admissions, gross_amount, deal_id, created_at,
-         venue:venues(id, name),
-         deal:deals(id, split_percentage, title:titles(id, name))
+         deal:deals(id, split_percentage,
+           title:titles(id, name),
+           venue:venues(id, name))
        )`,
     )
     .eq("id", id)

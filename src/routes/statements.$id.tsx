@@ -164,7 +164,7 @@ function ReviewInner({ statement }: { statement: StatementDetail }) {
                     <td className="px-4 py-3 tabular-nums text-muted-foreground">
                       {formatDate(line.play_date)}
                     </td>
-                    <td className="px-4 py-3">{line.venue?.name ?? "—"}</td>
+                    <td className="px-4 py-3">{line.deal?.venue?.name ?? "—"}</td>
                     <td className="px-4 py-3 text-muted-foreground">{line.screen ?? "—"}</td>
                     <td className="px-4 py-3 text-muted-foreground">{line.ticket_type ?? "—"}</td>
                     <td className="px-4 py-3 text-right tabular-nums">

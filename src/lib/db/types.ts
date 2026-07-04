@@ -9,6 +9,8 @@ export type StatementStatus =
   | "paid"
   | "failed";
 
+export type TicketType = "Adult" | "Child" | "Senior" | "Student";
+
 export interface Exhibitor {
   id: string;
   name: string;
@@ -58,11 +60,10 @@ export interface Statement {
 export interface BoxOfficeLine {
   id: string;
   statement_id: string;
-  venue_id: string | null;
   play_date: string | null;
   screen: string | null;
   format: string | null;
-  ticket_type: string | null;
+  ticket_type: TicketType | null;
   admissions: number | null;
   gross_amount: number | null;
   deal_id: string | null;
