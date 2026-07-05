@@ -25,8 +25,7 @@ export async function listStatementsWithTotals(): Promise<StatementListItem[]> {
   const { data, error } = await supabase
     .from("statements")
     .select(
-      `id, exhibitor_id, file_url, raw_extracted_json, fx_rate_applied,
-       period_start, period_end, status, created_at,
+      `id, exhibitor_id, period_start, period_end, status, created_at,
        exhibitor:exhibitors(id, name),
        invoices(xero_status),
        box_office_lines(gross_amount, admissions, deal:deals(title:titles(id, name, poster_url)))`,
@@ -72,8 +71,7 @@ export async function getStatement(id: string): Promise<StatementDetail | null> 
   const { data, error } = await supabase
     .from("statements")
     .select(
-      `id, exhibitor_id, file_url, raw_extracted_json, fx_rate_applied,
-       period_start, period_end, status, created_at,
+      `id, exhibitor_id, period_start, period_end, status, created_at,
        exhibitor:exhibitors(*),
        box_office_lines(
          id, statement_id, play_date, screen, format,

@@ -2,12 +2,10 @@
 // Do not add fields that don't exist in the DB.
 
 export type StatementStatus =
-  | "received"
+  | "uploaded"
   | "parsed"
   | "reviewed"
-  | "invoiced"
-  | "paid"
-  | "failed";
+  | "invoiced";
 
 export type TicketType = "Adult" | "Child" | "Senior" | "Student";
 
@@ -48,9 +46,6 @@ export interface Deal {
 export interface Statement {
   id: string;
   exhibitor_id: string | null;
-  file_url: string | null;
-  raw_extracted_json: unknown;
-  fx_rate_applied: number | null;
   period_start: string | null;
   period_end: string | null;
   status: StatementStatus | string;
