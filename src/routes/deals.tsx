@@ -112,7 +112,7 @@ function DealsPage() {
   return (
     <div className="min-h-screen bg-background">
       <AppHeader />
-      <main className="relative mx-auto max-w-6xl px-6 py-10">
+      <main className="relative mx-auto max-w-6xl px-4 py-10 sm:px-6">
         <div
           aria-hidden
           className="pointer-events-none absolute left-1/2 top-32 -z-0 h-[280px] w-[400px] -translate-x-1/2 -translate-y-1/2 animate-spotlight rounded-full blur-3xl"
