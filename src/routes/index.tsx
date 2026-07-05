@@ -327,11 +327,13 @@ function LiveNumbers({
   share,
   admissions,
   statements,
+  sparkline,
 }: {
   gross: number;
   share: number;
   admissions: number;
   statements: number;
+  sparkline: { play_date: string; gross: number }[];
 }) {
   const items = [
     { label: "Gross box office", value: formatCurrency(gross), animate: gross, currency: true },
@@ -369,8 +371,12 @@ function LiveNumbers({
           </Link>
         </div>
         <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-border bg-border md:grid-cols-4">
-          {items.map((i) => (
-            <div key={i.label} className="bg-card px-5 py-6">
+          {items.map((i, idx) => (
+            <div
+              key={i.label}
+              className="animate-rise-in bg-card px-5 py-6"
+              style={{ animationDelay: `${idx * 80}ms` }}
+            >
               <dt className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
                 {i.label}
               </dt>
@@ -387,10 +393,143 @@ function LiveNumbers({
             </div>
           ))}
         </dl>
+        {sparkline.length > 1 && (
+          <div className="mt-6 flex items-center gap-4">
+            <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
+              Daily gross · {sparkline.length} days
+            </p>
+            <Sparkline points={sparkline.map((p) => p.gross)} />
+          </div>
+        )}
       </div>
     </section>
   );
 }
+
+function Sparkline({ points }: { points: number[] }) {
+  if (points.length < 2) return null;
+  const w = 320;
+  const h = 44;
+  const max = Math.max(...points, 1);
+  const min = Math.min(...points, 0);
+  const range = max - min || 1;
+  const stepX = w / (points.length - 1);
+  const coords = points.map((v, i) => {
+    const x = i * stepX;
+    const y = h - ((v - min) / range) * h;
+    return [x, y] as const;
+  });
+  const path = coords
+    .map(([x, y], i) => (i === 0 ? `M${x},${y}` : `L${x},${y}`))
+    .join(" ");
+  const area = `${path} L${w},${h} L0,${h} Z`;
+  const last = coords[coords.length - 1];
+  return (
+    <svg
+      viewBox={`0 0 ${w} ${h}`}
+      width={w}
+      height={h}
+      className="flex-1"
+      preserveAspectRatio="none"
+      aria-hidden
+    >
+      <path d={area} fill="var(--color-accent-red)" opacity="0.12" />
+      <path
+        d={path}
+        fill="none"
+        stroke="var(--color-accent-red)"
+        strokeWidth="1.5"
+        strokeLinejoin="round"
+        strokeLinecap="round"
+      />
+      <circle
+        cx={last[0]}
+        cy={last[1]}
+        r="3"
+        fill="var(--color-accent-red)"
+      />
+    </svg>
+  );
+}
+
+function TopVenues({
+  venues,
+}: {
+  venues: {
+    venue_id: string;
+    venue_name: string;
+    exhibitor_name: string | null;
+    gross: number;
+    admissions: number;
+  }[];
+}) {
+  if (venues.length === 0) return null;
+  const top = venues.slice(0, 5);
+  const max = Math.max(...top.map((v) => v.gross), 1);
+  return (
+    <section className="border-t border-border bg-background">
+      <div className="mx-auto max-w-6xl px-6 py-16">
+        <div className="mb-8 flex items-baseline justify-between">
+          <div>
+            <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
+              Leaderboard
+            </p>
+            <h2 className="mt-2 font-serif text-3xl tracking-tight text-foreground">
+              Top venues by gross
+            </h2>
+          </div>
+          <Link
+            to="/performance"
+            className="text-sm text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
+          >
+            All venues →
+          </Link>
+        </div>
+        <ol className="space-y-4">
+          {top.map((v, i) => {
+            const pct = (v.gross / max) * 100;
+            return (
+              <li
+                key={v.venue_id}
+                className="animate-rise-in group grid grid-cols-[2ch_1fr_auto] items-baseline gap-4"
+                style={{ animationDelay: `${i * 90}ms` }}
+              >
+                <span className="font-serif text-lg text-accent-red tabular-nums">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <div className="min-w-0">
+                  <div className="flex items-baseline justify-between gap-4">
+                    <p className="truncate font-serif text-lg text-foreground">
+                      {v.venue_name}
+                      {v.exhibitor_name && (
+                        <span className="ml-2 text-xs uppercase tracking-[0.2em] text-muted-foreground">
+                          {v.exhibitor_name}
+                        </span>
+                      )}
+                    </p>
+                    <p className="whitespace-nowrap text-xs text-muted-foreground tabular-nums">
+                      {v.admissions.toLocaleString("en-GB")} admissions
+                    </p>
+                  </div>
+                  <div className="mt-2 h-1.5 w-full overflow-hidden bg-secondary">
+                    <div
+                      className="bar-fill h-full bg-foreground transition-colors group-hover:bg-accent-red"
+                      style={{ width: `${pct}%`, animationDelay: `${i * 90 + 120}ms` }}
+                    />
+                  </div>
+                </div>
+                <span className="font-serif text-lg tabular-nums text-foreground">
+                  {formatCurrency(v.gross)}
+                </span>
+              </li>
+            );
+          })}
+        </ol>
+      </div>
+    </section>
+  );
+}
+
 
 function CountUp({
   target,
