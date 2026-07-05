@@ -268,11 +268,11 @@ function TitleDeals({
             {activeCount} active
           </p>
         </div>
-        <div className="hidden text-right md:block">
+        <div className="shrink-0 text-right">
           <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-            Split range
+            Split
           </p>
-          <p className="mt-1 font-serif text-2xl tabular-nums text-foreground">
+          <p className="mt-1 font-serif text-xl tabular-nums text-foreground sm:text-2xl">
             {minSplit === maxSplit
               ? `${minSplit}%`
               : `${minSplit}–${maxSplit}%`}
