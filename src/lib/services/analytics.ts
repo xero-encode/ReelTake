@@ -54,6 +54,7 @@ export interface PerformanceSummary {
   byVenue: VenuePerformance[];
   byDeal: DealPerformance[];
   byTicketType: TicketTypePerformance[];
+  byPlayDate: PlayDatePerformance[];
 }
 
 interface LineRow {
