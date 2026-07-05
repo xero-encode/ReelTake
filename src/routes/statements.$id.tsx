@@ -8,7 +8,7 @@ import {
   markStatementReviewed,
   type StatementDetail,
 } from "@/lib/services/statements";
-import { supabase } from "@/integrations/supabase/client";
+
 import { StatusChip } from "@/components/StatusChip";
 import { MoneyCell } from "@/components/MoneyCell";
 import { Button } from "@/components/ui/button";
