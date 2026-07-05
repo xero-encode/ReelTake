@@ -30,6 +30,13 @@ export interface DealPerformance {
   distributorShare: number;
 }
 
+export interface PlayDatePerformance {
+  play_date: string;
+  admissions: number;
+  gross: number;
+  distributorShare: number;
+}
+
 export interface TicketTypePerformance {
   ticket_type: string;
   admissions: number;
