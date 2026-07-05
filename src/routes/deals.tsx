@@ -288,7 +288,7 @@ function TitleDeals({
           return (
             <li
               key={d.id}
-              className="animate-rise-in grid grid-cols-1 items-center gap-4 px-5 py-4 transition-colors hover:bg-secondary/40 md:grid-cols-[1.4fr_auto_1fr_auto]"
+              className="animate-rise-in grid grid-cols-[1fr_auto] items-center gap-x-4 gap-y-3 px-4 py-4 transition-colors hover:bg-secondary/40 sm:px-5 md:grid-cols-[1.4fr_auto_1fr_auto]"
               style={{ animationDelay: `${index * 80 + i * 40 + 100}ms` }}
             >
               <div className="min-w-0">
@@ -300,26 +300,28 @@ function TitleDeals({
                 </p>
               </div>
 
-              <SplitDial percent={d.split_percentage} />
+              <div className="flex items-center gap-3 md:contents">
+                <SplitDial percent={d.split_percentage} />
 
-              <div className="text-xs text-muted-foreground">
-                <p className="tabular-nums">
-                  <span className="text-foreground">
-                    {formatDate(d.valid_from)}
-                  </span>{" "}
-                  →{" "}
-                  <span className="text-foreground">
-                    {d.valid_to ? formatDate(d.valid_to) : "ongoing"}
-                  </span>
-                </p>
-                <p className="mt-0.5">
-                  {formatDuration(d.valid_from, d.valid_to, today)}
-                </p>
+                <div className="col-span-2 text-xs text-muted-foreground md:col-span-1">
+                  <p className="tabular-nums">
+                    <span className="text-foreground">
+                      {formatDate(d.valid_from)}
+                    </span>{" "}
+                    →{" "}
+                    <span className="text-foreground">
+                      {d.valid_to ? formatDate(d.valid_to) : "ongoing"}
+                    </span>
+                  </p>
+                  <p className="mt-0.5">
+                    {formatDuration(d.valid_from, d.valid_to, today)}
+                  </p>
+                </div>
               </div>
 
-              <p className="text-right font-serif text-lg tabular-nums text-foreground">
+              <p className="col-start-2 row-start-1 text-right font-serif text-lg tabular-nums text-foreground md:col-start-auto md:row-start-auto">
                 {d.split_percentage}%
-                <span className="ml-1 text-xs text-muted-foreground">
+                <span className="ml-1 hidden text-xs text-muted-foreground sm:inline">
                   to you
                 </span>
               </p>
