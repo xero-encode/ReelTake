@@ -37,6 +37,15 @@ export interface PlayDatePerformance {
   distributorShare: number;
 }
 
+export interface PlayDateDetail {
+  play_date: string;
+  title_id: string | null;
+  venue_id: string | null;
+  admissions: number;
+  gross: number;
+  distributorShare: number;
+}
+
 export interface TicketTypePerformance {
   ticket_type: string;
   admissions: number;
@@ -55,6 +64,7 @@ export interface PerformanceSummary {
   byDeal: DealPerformance[];
   byTicketType: TicketTypePerformance[];
   byPlayDate: PlayDatePerformance[];
+  playDateDetail: PlayDateDetail[];
 }
 
 interface LineRow {
