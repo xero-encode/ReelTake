@@ -47,7 +47,7 @@ function PerformancePage() {
   return (
     <div className="min-h-screen bg-background">
       <AppHeader />
-      <main className="relative mx-auto max-w-6xl px-6 py-10">
+      <main className="relative mx-auto max-w-6xl px-4 py-10 sm:px-6">
         <div
           aria-hidden
           className="pointer-events-none absolute left-1/2 top-32 -z-0 h-[280px] w-[400px] -translate-x-1/2 -translate-y-1/2 animate-spotlight rounded-full blur-3xl"
@@ -107,13 +107,13 @@ function SummaryBar({ data }: { data: PerformanceSummary }) {
       {items.map((i, idx) => (
         <div
           key={i.label}
-          className="animate-rise-in bg-card px-5 py-6"
+          className="animate-rise-in bg-card px-4 py-5 sm:px-5 sm:py-6"
           style={{ animationDelay: `${idx * 80}ms` }}
         >
           <dt className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
             {i.label}
           </dt>
-          <dd className="mt-2 font-serif text-3xl tabular-nums tracking-tight text-foreground">
+          <dd className="mt-2 font-serif text-xl tabular-nums tracking-tight text-foreground sm:text-3xl">
             <CountUp
               target={i.animate}
               format={(n) =>
@@ -223,9 +223,9 @@ function PlayDateBreakdown({ data }: { data: PerformanceSummary }) {
             Daily takings
           </h2>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex w-full flex-wrap gap-2 sm:w-auto">
           <Select value={titleId} onValueChange={setTitleId}>
-            <SelectTrigger className="h-9 w-[180px] text-xs">
+            <SelectTrigger className="h-9 min-w-0 flex-1 text-xs sm:w-[180px] sm:flex-none">
               <SelectValue placeholder="Title" />
             </SelectTrigger>
             <SelectContent>
@@ -238,7 +238,7 @@ function PlayDateBreakdown({ data }: { data: PerformanceSummary }) {
             </SelectContent>
           </Select>
           <Select value={venueId} onValueChange={setVenueId}>
-            <SelectTrigger className="h-9 w-[180px] text-xs">
+            <SelectTrigger className="h-9 min-w-0 flex-1 text-xs sm:w-[180px] sm:flex-none">
               <SelectValue placeholder="Venue" />
             </SelectTrigger>
             <SelectContent>
@@ -251,7 +251,7 @@ function PlayDateBreakdown({ data }: { data: PerformanceSummary }) {
             </SelectContent>
           </Select>
           <Select value={metric} onValueChange={(v) => setMetric(v as Metric)}>
-            <SelectTrigger className="h-9 w-[160px] text-xs">
+            <SelectTrigger className="h-9 min-w-0 flex-1 text-xs sm:w-[160px] sm:flex-none">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -276,7 +276,7 @@ function PlayDateBreakdown({ data }: { data: PerformanceSummary }) {
                   className="group relative flex h-full flex-1 flex-col justify-end"
                   title={`${d.play_date} · ${formatValue(d.value)}`}
                 >
-                  <span className="mb-1 text-center text-[8px] leading-none text-muted-foreground">
+                  <span className="mb-1 hidden text-center text-[8px] leading-none text-muted-foreground sm:block">
                     {formatValue(d.value)}
                   </span>
                   <div
@@ -312,7 +312,8 @@ function TitleBreakdown({ data }: { data: PerformanceSummary }) {
     <section>
       <SectionHeader eyebrow="By title" title="Films" />
       <div className="overflow-hidden rounded-lg border border-border bg-card">
-        <table className="w-full text-sm">
+        <div className="overflow-x-auto">
+        <table className="w-full min-w-[560px] text-sm">
           <thead className="border-b border-border bg-muted/30 text-left text-xs uppercase tracking-wider text-muted-foreground">
             <tr>
               <th className="px-5 py-3 font-medium">Title</th>
@@ -356,6 +357,7 @@ function TitleBreakdown({ data }: { data: PerformanceSummary }) {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
     </section>
   );
@@ -432,7 +434,8 @@ function DealBreakdown({ data }: { data: PerformanceSummary }) {
     <section>
       <SectionHeader eyebrow="By deal" title="Deals" />
       <div className="overflow-hidden rounded-lg border border-border bg-card">
-        <table className="w-full text-sm">
+        <div className="overflow-x-auto">
+        <table className="w-full min-w-[560px] text-sm">
           <thead className="border-b border-border bg-muted/30 text-left text-xs uppercase tracking-wider text-muted-foreground">
             <tr>
               <th className="px-5 py-3 font-medium">Title</th>
@@ -462,6 +465,7 @@ function DealBreakdown({ data }: { data: PerformanceSummary }) {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
     </section>
   );

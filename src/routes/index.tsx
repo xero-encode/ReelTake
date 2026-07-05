@@ -112,7 +112,7 @@ function Hero({ titles }: { titles: FeaturedTitle[] }) {
         aria-hidden
         className="pointer-events-none absolute inset-x-0 top-0 -z-0 h-64 bg-[radial-gradient(ellipse_at_top,rgba(0,0,0,0.06),transparent_70%)]"
       />
-      <div className="relative mx-auto max-w-6xl px-6 pb-20 pt-16 md:pt-24">
+      <div className="relative mx-auto max-w-6xl px-4 pb-20 pt-16 sm:px-6 md:pt-24">
         <div className="text-center animate-rise-in">
           <p className="mb-4 inline-flex items-center gap-2 text-xs uppercase tracking-[0.3em] text-muted-foreground">
             <span className="inline-block h-1 w-1 animate-reel-tick rounded-full bg-accent-red" />
@@ -353,8 +353,8 @@ function LiveNumbers({
   ];
   return (
     <section className="border-y border-border bg-background">
-      <div className="mx-auto max-w-6xl px-6 py-14">
-        <div className="mb-8 flex items-baseline justify-between">
+      <div className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
+        <div className="mb-8 flex flex-wrap items-baseline justify-between gap-4">
           <div>
             <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
               Live totals
@@ -374,13 +374,13 @@ function LiveNumbers({
           {items.map((i, idx) => (
             <div
               key={i.label}
-              className="animate-rise-in bg-card px-5 py-6"
+              className="animate-rise-in bg-card px-4 py-5 sm:px-5 sm:py-6"
               style={{ animationDelay: `${idx * 80}ms` }}
             >
               <dt className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
                 {i.label}
               </dt>
-              <dd className="mt-2 font-serif text-3xl tabular-nums tracking-tight text-foreground">
+              <dd className="mt-2 font-serif text-xl tabular-nums tracking-tight text-foreground sm:text-3xl">
                 <CountUp
                   target={i.animate}
                   format={(n) =>
@@ -468,8 +468,8 @@ function TopVenues({
   const max = Math.max(...top.map((v) => v.gross), 1);
   return (
     <section className="border-t border-border bg-background">
-      <div className="mx-auto max-w-6xl px-6 py-16">
-        <div className="mb-8 flex items-baseline justify-between">
+      <div className="mx-auto max-w-6xl px-4 py-16 sm:px-6">
+        <div className="mb-8 flex flex-wrap items-baseline justify-between gap-4">
           <div>
             <p className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
               Leaderboard

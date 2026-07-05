@@ -112,7 +112,7 @@ function DealsPage() {
   return (
     <div className="min-h-screen bg-background">
       <AppHeader />
-      <main className="relative mx-auto max-w-6xl px-6 py-10">
+      <main className="relative mx-auto max-w-6xl px-4 py-10 sm:px-6">
         <div
           aria-hidden
           className="pointer-events-none absolute left-1/2 top-32 -z-0 h-[280px] w-[400px] -translate-x-1/2 -translate-y-1/2 animate-spotlight rounded-full blur-3xl"
@@ -218,13 +218,13 @@ function StatsStrip({
       {items.map((i, idx) => (
         <div
           key={i.label}
-          className="animate-rise-in bg-card px-5 py-6"
+          className="animate-rise-in bg-card px-4 py-5 sm:px-5 sm:py-6"
           style={{ animationDelay: `${idx * 80}ms` }}
         >
           <dt className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
             {i.label}
           </dt>
-          <dd className="mt-2 font-serif text-3xl tabular-nums tracking-tight text-foreground">
+          <dd className="mt-2 font-serif text-2xl tabular-nums tracking-tight text-foreground sm:text-3xl">
             {i.value}
           </dd>
         </div>
@@ -257,10 +257,10 @@ function TitleDeals({
       className="group animate-rise-in overflow-hidden rounded-lg border border-border bg-card transition-colors hover:border-foreground/30"
       style={{ animationDelay: `${index * 80}ms` }}
     >
-      <header className="flex items-center gap-5 border-b border-border bg-secondary/30 px-5 py-4">
+      <header className="flex items-center gap-4 border-b border-border bg-secondary/30 px-4 py-4 sm:gap-5 sm:px-5">
         <Poster title={title} />
         <div className="min-w-0 flex-1">
-          <h2 className="truncate font-serif text-2xl tracking-tight text-foreground">
+          <h2 className="truncate font-serif text-xl tracking-tight text-foreground sm:text-2xl">
             {title?.name ?? "Unknown title"}
           </h2>
           <p className="mt-1 text-xs uppercase tracking-[0.2em] text-muted-foreground">
@@ -268,11 +268,11 @@ function TitleDeals({
             {activeCount} active
           </p>
         </div>
-        <div className="hidden text-right md:block">
+        <div className="shrink-0 text-right">
           <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-            Split range
+            Split
           </p>
-          <p className="mt-1 font-serif text-2xl tabular-nums text-foreground">
+          <p className="mt-1 font-serif text-xl tabular-nums text-foreground sm:text-2xl">
             {minSplit === maxSplit
               ? `${minSplit}%`
               : `${minSplit}–${maxSplit}%`}
@@ -288,7 +288,7 @@ function TitleDeals({
           return (
             <li
               key={d.id}
-              className="animate-rise-in grid grid-cols-1 items-center gap-4 px-5 py-4 transition-colors hover:bg-secondary/40 md:grid-cols-[1.4fr_auto_1fr_auto]"
+              className="animate-rise-in grid grid-cols-[1fr_auto] items-center gap-x-4 gap-y-3 px-4 py-4 transition-colors hover:bg-secondary/40 sm:px-5 md:grid-cols-[1.4fr_auto_1fr_auto]"
               style={{ animationDelay: `${index * 80 + i * 40 + 100}ms` }}
             >
               <div className="min-w-0">
@@ -300,26 +300,28 @@ function TitleDeals({
                 </p>
               </div>
 
-              <SplitDial percent={d.split_percentage} />
+              <div className="flex items-center gap-3 md:contents">
+                <SplitDial percent={d.split_percentage} />
 
-              <div className="text-xs text-muted-foreground">
-                <p className="tabular-nums">
-                  <span className="text-foreground">
-                    {formatDate(d.valid_from)}
-                  </span>{" "}
-                  →{" "}
-                  <span className="text-foreground">
-                    {d.valid_to ? formatDate(d.valid_to) : "ongoing"}
-                  </span>
-                </p>
-                <p className="mt-0.5">
-                  {formatDuration(d.valid_from, d.valid_to, today)}
-                </p>
+                <div className="col-span-2 text-xs text-muted-foreground md:col-span-1">
+                  <p className="tabular-nums">
+                    <span className="text-foreground">
+                      {formatDate(d.valid_from)}
+                    </span>{" "}
+                    →{" "}
+                    <span className="text-foreground">
+                      {d.valid_to ? formatDate(d.valid_to) : "ongoing"}
+                    </span>
+                  </p>
+                  <p className="mt-0.5">
+                    {formatDuration(d.valid_from, d.valid_to, today)}
+                  </p>
+                </div>
               </div>
 
-              <p className="text-right font-serif text-lg tabular-nums text-foreground">
+              <p className="col-start-2 row-start-1 text-right font-serif text-lg tabular-nums text-foreground md:col-start-auto md:row-start-auto">
                 {d.split_percentage}%
-                <span className="ml-1 text-xs text-muted-foreground">
+                <span className="ml-1 hidden text-xs text-muted-foreground sm:inline">
                   to you
                 </span>
               </p>
