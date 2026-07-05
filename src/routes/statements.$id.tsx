@@ -116,9 +116,9 @@ function ReviewInner({ statement }: { statement: StatementDetail }) {
             <h1 className="mt-1 font-serif text-4xl leading-tight text-foreground">
               {statement.exhibitor?.name ?? "Unknown exhibitor"}
             </h1>
-            {statement.title?.name && (
-              <p className="mt-2 text-muted-foreground">{statement.title.name}</p>
-            )}
+            <p className="mt-2 text-muted-foreground">
+              {totals.totalAdmissions.toLocaleString("en-GB")} admissions
+            </p>
           </div>
           <StatusChip status={statement.status} />
         </div>
