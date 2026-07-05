@@ -270,7 +270,7 @@ function PlayDateBreakdown({ data }: { data: PerformanceSummary }) {
         ) : (
           <>
             <div className="flex h-40 items-end gap-1">
-              {rows.map((d) => (
+              {rows.map((d, i) => (
                 <div
                   key={d.play_date}
                   className="group relative flex h-full flex-1 flex-col justify-end"
@@ -280,12 +280,17 @@ function PlayDateBreakdown({ data }: { data: PerformanceSummary }) {
                     {formatValue(d.value)}
                   </span>
                   <div
-                    className="w-full bg-accent-red/80 transition-colors group-hover:bg-accent-red"
-                    style={{ height: `${Math.max((d.value / max) * 100, 2)}%` }}
+                    className="bar-fill w-full origin-bottom bg-accent-red/80 transition-colors group-hover:bg-accent-red"
+                    style={{
+                      height: `${Math.max((d.value / max) * 100, 2)}%`,
+                      animationDelay: `${Math.min(i * 12, 400)}ms`,
+                      transformOrigin: "bottom",
+                    }}
                   />
                 </div>
               ))}
             </div>
+
             <div className="mt-3 flex justify-between text-[10px] uppercase tracking-wider text-muted-foreground">
               <span>{rows[0].play_date}</span>
               <span>
