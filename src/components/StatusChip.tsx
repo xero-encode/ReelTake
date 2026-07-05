@@ -19,8 +19,9 @@ const STYLES: Record<string, string> = {
 };
 
 export function StatusChip({ status }: { status: Status }) {
-  const key = status.toLowerCase();
-  const label = LABELS[key] ?? status;
+  const normalizedStatus = status?.toString().toLowerCase() ?? "uploaded";
+  const key = normalizedStatus;
+  const label = LABELS[key] ?? status ?? "Uploaded";
   const style = STYLES[key] ?? STYLES.uploaded;
   return (
     <span

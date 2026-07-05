@@ -53,9 +53,10 @@ function ReviewInner({ statement }: { statement: StatementDetail }) {
   const [invoicing, setInvoicing] = useState(false);
 
   const totals = statementTotals(statement.box_office_lines);
+  const normalizedStatus = statement.status ?? "uploaded";
   const canConfirm =
     totals.linesMissingDeal === 0 &&
-    (statement.status === "uploaded" || statement.status === "parsed");
+    (normalizedStatus === "uploaded" || normalizedStatus === "parsed");
 
   const confirm = useMutation({
     mutationFn: () => markStatementReviewed(statement.id),
@@ -120,7 +121,7 @@ function ReviewInner({ statement }: { statement: StatementDetail }) {
               {totals.totalAdmissions.toLocaleString("en-GB")} admissions
             </p>
           </div>
-          <StatusChip status={statement.status} />
+          <StatusChip status={normalizedStatus} />
         </div>
       </div>
 

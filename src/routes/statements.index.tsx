@@ -33,8 +33,9 @@ export const Route = createFileRoute("/statements/")({
 
 // A statement is considered "paid" when its invoice has been marked PAID in Xero.
 function displayStatus(s: StatementListItem): string {
-  if (s.status === "invoiced" && s.invoiceStatus?.toUpperCase() === "PAID") return "paid";
-  return s.status;
+  const status = s.status ?? "uploaded";
+  if (status === "invoiced" && s.invoiceStatus?.toUpperCase() === "PAID") return "paid";
+  return status;
 }
 
 function matches(filter: Filter, s: StatementListItem): boolean {

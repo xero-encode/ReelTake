@@ -48,7 +48,7 @@ export interface Statement {
   exhibitor_id: string | null;
   period_start: string | null;
   period_end: string | null;
-  status: StatementStatus | string;
+  status: StatementStatus | string | null;
   created_at: string;
 }
 
