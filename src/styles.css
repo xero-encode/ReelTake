@@ -136,6 +136,10 @@
   from { transform: scaleX(0); }
   to { transform: scaleX(1); }
 }
+@keyframes bar-grow-y {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
+}
 
 @utility animate-marquee {
   animation: marquee 45s linear infinite;
@@ -156,4 +160,9 @@
   transform-origin: left center;
   animation: bar-grow 1.1s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
+@utility bar-fill-y {
+  transform-origin: bottom center;
+  animation: bar-grow-y 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
 

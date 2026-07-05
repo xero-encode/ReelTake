@@ -1,6 +1,7 @@
 import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+
 
 import { AppHeader } from "@/components/AppHeader";
 import { EmptyState } from "@/components/EmptyState";
@@ -46,12 +47,22 @@ function PerformancePage() {
   return (
     <div className="min-h-screen bg-background">
       <AppHeader />
-      <main className="mx-auto max-w-6xl px-6 py-10">
-        <header className="mb-10">
-          <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
+      <main className="relative mx-auto max-w-6xl px-6 py-10">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute left-1/2 top-0 -z-0 h-[360px] w-[520px] -translate-x-1/2 animate-spotlight rounded-full blur-3xl"
+          style={{
+            background:
+              "radial-gradient(circle, var(--color-accent-red) 0%, transparent 60%)",
+            opacity: 0.22,
+          }}
+        />
+        <header className="relative mb-10 animate-rise-in">
+          <p className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-muted-foreground">
+            <span className="inline-block h-1 w-1 animate-reel-tick rounded-full bg-accent-red" />
             Box office
           </p>
-          <h1 className="mt-2 font-serif text-4xl tracking-tight text-foreground">
+          <h1 className="mt-2 font-serif text-4xl tracking-tight text-foreground md:text-5xl">
             Performance
           </h1>
           <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
@@ -86,26 +97,63 @@ function PerformancePage() {
 
 function SummaryBar({ data }: { data: PerformanceSummary }) {
   const items = [
-    { label: "Gross box office", value: formatCurrency(data.totalGross) },
-    { label: "Your share", value: formatCurrency(data.totalDistributorShare) },
-    { label: "Admissions", value: data.totalAdmissions.toLocaleString("en-GB") },
-    { label: "Statements", value: data.statementCount.toLocaleString("en-GB") },
+    { label: "Gross box office", animate: data.totalGross, currency: true },
+    { label: "Your share", animate: data.totalDistributorShare, currency: true },
+    { label: "Admissions", animate: data.totalAdmissions, currency: false },
+    { label: "Statements", animate: data.statementCount, currency: false },
   ];
   return (
-    <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-border bg-border md:grid-cols-4">
-      {items.map((i) => (
-        <div key={i.label} className="bg-card px-5 py-6">
+    <dl className="relative grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-border bg-border md:grid-cols-4">
+      {items.map((i, idx) => (
+        <div
+          key={i.label}
+          className="animate-rise-in bg-card px-5 py-6"
+          style={{ animationDelay: `${idx * 80}ms` }}
+        >
           <dt className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
             {i.label}
           </dt>
           <dd className="mt-2 font-serif text-3xl tabular-nums tracking-tight text-foreground">
-            {i.value}
+            <CountUp
+              target={i.animate}
+              format={(n) =>
+                i.currency
+                  ? formatCurrency(n)
+                  : Math.round(n).toLocaleString("en-GB")
+              }
+            />
           </dd>
         </div>
       ))}
     </dl>
   );
 }
+
+function CountUp({
+  target,
+  format,
+  duration = 900,
+}: {
+  target: number;
+  format: (n: number) => string;
+  duration?: number;
+}) {
+  const [value, setValue] = useState(0);
+  useEffect(() => {
+    let raf = 0;
+    const start = performance.now();
+    const tick = (t: number) => {
+      const p = Math.min(1, (t - start) / duration);
+      const eased = 1 - Math.pow(1 - p, 3);
+      setValue(target * eased);
+      if (p < 1) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [target, duration]);
+  return <>{format(value)}</>;
+}
+
 
 function SectionHeader({ eyebrow, title }: { eyebrow: string; title: string }) {
   return (
@@ -222,7 +270,7 @@ function PlayDateBreakdown({ data }: { data: PerformanceSummary }) {
         ) : (
           <>
             <div className="flex h-40 items-end gap-1">
-              {rows.map((d) => (
+              {rows.map((d, i) => (
                 <div
                   key={d.play_date}
                   className="group relative flex h-full flex-1 flex-col justify-end"
@@ -232,12 +280,17 @@ function PlayDateBreakdown({ data }: { data: PerformanceSummary }) {
                     {formatValue(d.value)}
                   </span>
                   <div
-                    className="w-full bg-accent-red/80 transition-colors group-hover:bg-accent-red"
-                    style={{ height: `${Math.max((d.value / max) * 100, 2)}%` }}
+                    className="bar-fill-y w-full bg-accent-red/80 transition-colors group-hover:bg-accent-red"
+                    style={{
+                      height: `${Math.max((d.value / max) * 100, 2)}%`,
+                      animationDelay: `${Math.min(i * 12, 400)}ms`,
+                    }}
                   />
+
                 </div>
               ))}
             </div>
+
             <div className="mt-3 flex justify-between text-[10px] uppercase tracking-wider text-muted-foreground">
               <span>{rows[0].play_date}</span>
               <span>
@@ -270,8 +323,12 @@ function TitleBreakdown({ data }: { data: PerformanceSummary }) {
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
-            {data.byTitle.map((t) => (
-              <tr key={t.title_id}>
+            {data.byTitle.map((t, i) => (
+              <tr
+                key={t.title_id}
+                className="animate-rise-in transition-colors hover:bg-secondary/30"
+                style={{ animationDelay: `${i * 60}ms` }}
+              >
                 <td className="px-5 py-3 font-serif text-base text-foreground">
                   {t.title_name}
                 </td>
@@ -287,8 +344,11 @@ function TitleBreakdown({ data }: { data: PerformanceSummary }) {
                 <td className="px-5 py-3">
                   <div className="h-1.5 w-full overflow-hidden bg-muted">
                     <div
-                      className="h-full bg-accent-red"
-                      style={{ width: `${(t.gross / max) * 100}%` }}
+                      className="bar-fill h-full bg-accent-red"
+                      style={{
+                        width: `${(t.gross / max) * 100}%`,
+                        animationDelay: `${i * 60 + 120}ms`,
+                      }}
                     />
                   </div>
                 </td>
@@ -306,10 +366,11 @@ function VenueBreakdown({ data }: { data: PerformanceSummary }) {
     <section>
       <SectionHeader eyebrow="By venue" title="Cinemas" />
       <ul className="divide-y divide-border rounded-lg border border-border bg-card">
-        {data.byVenue.slice(0, 10).map((v) => (
+        {data.byVenue.slice(0, 10).map((v, i) => (
           <li
             key={v.venue_id}
-            className="flex items-baseline justify-between px-5 py-3"
+            className="animate-rise-in flex items-baseline justify-between px-5 py-3 transition-colors hover:bg-secondary/30"
+            style={{ animationDelay: `${i * 50}ms` }}
           >
             <div>
               <p className="text-sm text-foreground">{v.venue_name}</p>
@@ -337,8 +398,12 @@ function TicketTypeBreakdown({ data }: { data: PerformanceSummary }) {
     <section>
       <SectionHeader eyebrow="By ticket type" title="Ticket mix" />
       <ul className="space-y-3 rounded-lg border border-border bg-card p-5">
-        {data.byTicketType.map((t) => (
-          <li key={t.ticket_type}>
+        {data.byTicketType.map((t, i) => (
+          <li
+            key={t.ticket_type}
+            className="animate-rise-in"
+            style={{ animationDelay: `${i * 70}ms` }}
+          >
             <div className="mb-1 flex items-baseline justify-between text-sm">
               <span className="text-foreground">{t.ticket_type}</span>
               <span className="tabular-nums text-muted-foreground">
@@ -347,14 +412,18 @@ function TicketTypeBreakdown({ data }: { data: PerformanceSummary }) {
             </div>
             <div className="h-1.5 w-full overflow-hidden bg-muted">
               <div
-                className="h-full bg-foreground"
-                style={{ width: `${t.share}%` }}
+                className="bar-fill h-full bg-foreground"
+                style={{
+                  width: `${t.share}%`,
+                  animationDelay: `${i * 70 + 120}ms`,
+                }}
               />
             </div>
           </li>
         ))}
       </ul>
     </section>
+
   );
 }
 
