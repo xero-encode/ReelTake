@@ -357,6 +357,7 @@ function TitleBreakdown({ data }: { data: PerformanceSummary }) {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
     </section>
   );
