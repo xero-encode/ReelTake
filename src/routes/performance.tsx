@@ -434,7 +434,8 @@ function DealBreakdown({ data }: { data: PerformanceSummary }) {
     <section>
       <SectionHeader eyebrow="By deal" title="Deals" />
       <div className="overflow-hidden rounded-lg border border-border bg-card">
-        <table className="w-full text-sm">
+        <div className="overflow-x-auto">
+        <table className="w-full min-w-[560px] text-sm">
           <thead className="border-b border-border bg-muted/30 text-left text-xs uppercase tracking-wider text-muted-foreground">
             <tr>
               <th className="px-5 py-3 font-medium">Title</th>
@@ -464,6 +465,7 @@ function DealBreakdown({ data }: { data: PerformanceSummary }) {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
     </section>
   );
