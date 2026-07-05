@@ -9,14 +9,15 @@ import type {
 } from "@/lib/db/types";
 
 export interface StatementListItem extends Statement {
-  title: Pick<Title, "id" | "name" | "poster_url"> | null;
   exhibitor: Pick<Exhibitor, "id" | "name"> | null;
   totalGross: number;
+  totalAdmissions: number;
   invoiceStatus: string | null;
 }
 
 interface LineTitleRow {
   gross_amount: number | null;
+  admissions: number | null;
   deal: { title: Pick<Title, "id" | "name" | "poster_url"> | null } | null;
 }
 
@@ -28,7 +29,7 @@ export async function listStatementsWithTotals(): Promise<StatementListItem[]> {
        period_start, period_end, status, created_at,
        exhibitor:exhibitors(id, name),
        invoices(xero_status),
-       box_office_lines(gross_amount, deal:deals(title:titles(id, name, poster_url)))`,
+       box_office_lines(gross_amount, admissions, deal:deals(title:titles(id, name, poster_url)))`,
     )
     .order("created_at", { ascending: false });
 
