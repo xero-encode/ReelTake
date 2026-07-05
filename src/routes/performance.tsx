@@ -223,9 +223,9 @@ function PlayDateBreakdown({ data }: { data: PerformanceSummary }) {
             Daily takings
           </h2>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex w-full flex-wrap gap-2 sm:w-auto">
           <Select value={titleId} onValueChange={setTitleId}>
-            <SelectTrigger className="h-9 w-[180px] text-xs">
+            <SelectTrigger className="h-9 min-w-0 flex-1 text-xs sm:w-[180px] sm:flex-none">
               <SelectValue placeholder="Title" />
             </SelectTrigger>
             <SelectContent>
@@ -238,7 +238,7 @@ function PlayDateBreakdown({ data }: { data: PerformanceSummary }) {
             </SelectContent>
           </Select>
           <Select value={venueId} onValueChange={setVenueId}>
-            <SelectTrigger className="h-9 w-[180px] text-xs">
+            <SelectTrigger className="h-9 min-w-0 flex-1 text-xs sm:w-[180px] sm:flex-none">
               <SelectValue placeholder="Venue" />
             </SelectTrigger>
             <SelectContent>
@@ -251,7 +251,7 @@ function PlayDateBreakdown({ data }: { data: PerformanceSummary }) {
             </SelectContent>
           </Select>
           <Select value={metric} onValueChange={(v) => setMetric(v as Metric)}>
-            <SelectTrigger className="h-9 w-[160px] text-xs">
+            <SelectTrigger className="h-9 min-w-0 flex-1 text-xs sm:w-[160px] sm:flex-none">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
