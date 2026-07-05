@@ -78,13 +78,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "ReelTake — Box office returns for indie distributors" },
+      { title: "ReelTake — Box office returns for indie filmmakers" },
       {
         name: "description",
         content:
           "Review cinema returns statements, apply your deal splits, and raise invoices in Xero.",
       },
-      { property: "og:title", content: "ReelTake" },
+      { property: "og:title", content: "ReelTake — Box office returns for indie filmmakers" },
       {
         property: "og:description",
         content:
@@ -92,6 +92,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
+      { name: "twitter:title", content: "ReelTake — Box office returns for indie filmmakers" },
+      { name: "description", content: "Review cinema returns statements, apply deal splits, and raise Xero invoices — built for independent filmmakers." },
+      { property: "og:description", content: "Review cinema returns statements, apply deal splits, and raise Xero invoices — built for independent filmmakers." },
+      { name: "twitter:description", content: "Review cinema returns statements, apply deal splits, and raise Xero invoices — built for independent filmmakers." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/a51e975e-9bd1-4b43-b5ae-c1115185825c/id-preview-334e5dee--e09519b6-3e99-4f53-b3a0-19d8df023e28.lovable.app-1783235056144.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/a51e975e-9bd1-4b43-b5ae-c1115185825c/id-preview-334e5dee--e09519b6-3e99-4f53-b3a0-19d8df023e28.lovable.app-1783235056144.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
