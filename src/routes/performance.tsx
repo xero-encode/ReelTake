@@ -58,6 +58,7 @@ function PerformancePage() {
           <>
             <SummaryBar data={data} />
             <div className="mt-12 space-y-12">
+              <PlayDateBreakdown data={data} />
               <TitleBreakdown data={data} />
               <div className="grid grid-cols-1 gap-12 lg:grid-cols-2">
                 <VenueBreakdown data={data} />
