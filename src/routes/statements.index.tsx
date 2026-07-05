@@ -150,6 +150,7 @@ function StatementsList() {
                     ))}
                   </tbody>
                 </table>
+                </div>
               </div>
             </section>
           ))}
